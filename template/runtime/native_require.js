@@ -13,6 +13,7 @@ var game_file_list = [
 	"bin-debug/LoadingUI.js",
 	"bin-debug/Main.js",
 	"bin-debug/PhysicWorld.js",
+	"bin-debug/Utils.js",
 	//----auto game_file_list end----
 ];
 

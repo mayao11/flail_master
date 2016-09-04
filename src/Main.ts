@@ -169,20 +169,25 @@ class Main extends egret.DisplayObjectContainer {
         
         var b1 = pw.CreateRect(1, 0.1, {mass:0.1});
         this.addChild(b1.displays[0]);
-        var b1_shape = <p2.Box>(b1.shapes[0]);
-        var b1_width = b1_shape.width;
-        var b1_height = b1_shape.height;
-        var con = new p2.RevoluteConstraint(fix_circle, b1, {localPivotA:[0, 0], localPivotB:[0-b1_width/2-0.2, 0+b1_height/2]});
+        var b1_con_pos = LocalPosByNormalizePos_Box(b1, [-1, 0]);
+        b1_con_pos[0] -= 0.2;
+        var con = new p2.RevoluteConstraint(fix_circle, b1, {localPivotA:[0, 0], localPivotB:[b1_con_pos[0], b1_con_pos[1]]});
         pw.World().addConstraint(con);
         
         /*
-        var b2 = CreateRect(1, 0.1, 0, 0, {mass:0.1});
+        var b2 = pw.CreateRect(1, 0.1, {mass:0.1});
         var b2_shape = <p2.Box>(b1.shapes[0]);
         var b2_width = b2_shape.width;
         var b2_height = b2_shape.height;
         var con2 = new p2.RevoluteConstraint(b1, b2, {localPivotA:[0+b1_width/2+0.1, b1_height/2], localPivotB:[0-b2_width/2-0.1, b2_height/2]});
         world.addConstraint(con2);
         */
+        
+        this.addEventListener(egret.TouchEvent.TOUCH_TAP, (evt:egret.TouchEvent) => {
+            var force_point = LocalPosByNormalizePos_Box(b1, [1, 0]);
+            b1.applyForceLocal([1000,0], [0.5,0]);
+        }, this);
+        this.touchEnabled = true;
         
     }
 

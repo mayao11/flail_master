@@ -112,3 +112,13 @@ function LocalPosByNormalizePos_Box(b:p2.Body, pos:number[]): number[]
     return [w/2*pos[0], h/2*pos[1]];
 }
 
+function LocalPosByNormalizePos_Circle(c:p2.Body, pos:number[]): number[]
+{
+    var shape = <p2.Circle>(c.shapes[0]);
+    if (shape == null) {
+        return [null, null];
+    }
+    var w = shape.radius;
+    var h = shape.radius;
+    return [w*pos[0], h*pos[1]];
+}

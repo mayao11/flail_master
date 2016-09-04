@@ -144,7 +144,7 @@ class Main extends egret.DisplayObjectContainer {
             }
         }, this);
     }
-
+    
     /**
      * 创建游戏场景
      * Create a game scene
@@ -167,25 +167,50 @@ class Main extends egret.DisplayObjectContainer {
         fix_circle.position = [pw.stageWidth/2, pw.stageHeight/2];
         this.addChild(fix_circle.displays[0]);
         
+        var con:p2.RevoluteConstraint;
+        var prev_pos:number[];
+        var con_pos:number[];
+        
+        function connect_box_box(b1:p2.Body, b2:p2.Body) {
+            prev_pos = LocalPosByNormalizePos_Box(b1, [1,0]);
+            con_pos = LocalPosByNormalizePos_Box(b2, [-1,0]);
+            con_pos[0] -= 0.1;
+            con = new p2.RevoluteConstraint(b1, b2, {localPivotA:prev_pos, localPivotB:con_pos});
+            pw.World().addConstraint(con);
+        }
+        
         var b1 = pw.CreateRect(1, 0.1, {mass:0.1});
         this.addChild(b1.displays[0]);
-        var b1_con_pos = LocalPosByNormalizePos_Box(b1, [-1, 0]);
-        b1_con_pos[0] -= 0.2;
-        var con = new p2.RevoluteConstraint(fix_circle, b1, {localPivotA:[0, 0], localPivotB:[b1_con_pos[0], b1_con_pos[1]]});
+        prev_pos = [0,0];
+        con_pos = LocalPosByNormalizePos_Box(b1, [-1, 0]);
+        con_pos[0] -= 0.2;
+        con = new p2.RevoluteConstraint(fix_circle, b1, {localPivotA:prev_pos, localPivotB:con_pos});
         pw.World().addConstraint(con);
         
-        /*
-        var b2 = pw.CreateRect(1, 0.1, {mass:0.1});
-        var b2_shape = <p2.Box>(b1.shapes[0]);
-        var b2_width = b2_shape.width;
-        var b2_height = b2_shape.height;
-        var con2 = new p2.RevoluteConstraint(b1, b2, {localPivotA:[0+b1_width/2+0.1, b1_height/2], localPivotB:[0-b2_width/2-0.1, b2_height/2]});
-        world.addConstraint(con2);
-        */
+        var weapon_length = 2;
+        var l_boxes: Array<p2.Body> = [];
+        l_boxes.push(b1);
+        for (var i=0; i<weapon_length; ++i) {
+            var new_box = pw.CreateRect(0.5, 0.1, {mass:0.01});
+            l_boxes.push(new_box);
+            this.addChild(new_box.displays[0]);
+        }
+        for (var i=0; i<weapon_length; ++i) {
+            connect_box_box(l_boxes[i], l_boxes[i+1]);
+        }
+        
+        var heavy_circle = pw.CreateCircle(0.3, {mass:0.5});
+        this.addChild(heavy_circle.displays[0]);
+        var last_box = l_boxes[l_boxes.length-1];
+        prev_pos = LocalPosByNormalizePos_Box(last_box, [1,0]);
+        prev_pos[0] += 0.3;
+        con_pos = [0,0];
+        con = new p2.RevoluteConstraint(last_box, heavy_circle, {localPivotA:prev_pos, localPivotB:con_pos});
+        pw.World().addConstraint(con);
         
         this.addEventListener(egret.TouchEvent.TOUCH_TAP, (evt:egret.TouchEvent) => {
             var force_point = LocalPosByNormalizePos_Box(b1, [1, 0]);
-            b1.applyForceLocal([1000,0], [0.5,0]);
+            b1.applyForceLocal([0,-1000], [0.5,0]);
         }, this);
         this.touchEnabled = true;
         

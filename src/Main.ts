@@ -124,12 +124,12 @@ class Main extends egret.DisplayObjectContainer {
             if (angle < 0) {
                 angle += 2*Math.PI;
             }
-            var STADY_P = 10;
+            var STADY_P = 7;
             var FRONT_ANGLE = 7/8 * 2*Math.PI;//7/8 * 2*Math.PI;
             var BACK_ANGLE = 3/8 * 2*Math.PI;
             var force_point = LocalPosByNormalizedPos_Box(g.arm, [1,0]);
             if (g.arm_state == 0) {
-                if (angle<FRONT_ANGLE && angle>3/8 * 2*Math.PI) {
+                if (angle<FRONT_ANGLE && angle>4/8 * 2*Math.PI) {
                     //g.arm.angularVelocity = -STADY_P;
                     g.arm.applyForceLocal([0,STADY_P],  force_point)
                 }
@@ -140,7 +140,7 @@ class Main extends egret.DisplayObjectContainer {
             }
             else {
                 log(angle)
-                if (angle<BACK_ANGLE || angle>7/8 * 2*Math.PI) {
+                if (angle<BACK_ANGLE || angle>6/8 * 2*Math.PI) {
                     //g.arm.angularVelocity = -STADY_P;
                     g.arm.applyForceLocal([0,STADY_P],  force_point)
                 }
@@ -235,7 +235,7 @@ class Main extends egret.DisplayObjectContainer {
         var l_boxes: Array<p2.Body> = [];
         l_boxes.push(b1);
         for (var i=0; i<weapon_length; ++i) {
-            var new_box = pw.CreateRect(0.5, 0.1, {mass:0.01});
+            var new_box = pw.CreateRect(0.5, 0.1, {mass:0.03});
             l_boxes.push(new_box);
             this.addChild(new_box.displays[0]);
         }
@@ -243,7 +243,7 @@ class Main extends egret.DisplayObjectContainer {
             connect_box_box(l_boxes[i], l_boxes[i+1]);
         }
         
-        var heavy_circle = pw.CreateCircle(0.3, {mass:0.06});
+        var heavy_circle = pw.CreateCircle(0.3, {mass:0.05});
         this.addChild(heavy_circle.displays[0]);
         var last_box = l_boxes[l_boxes.length-1];
         var to_pos = [0,0];

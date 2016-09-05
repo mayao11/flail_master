@@ -101,7 +101,7 @@ function error(arg0: any, ...args: any[]):void {
     console.log(arg0, ...args);
 }
 
-function LocalPosByNormalizePos_Box(b:p2.Body, pos:number[]): number[]
+function LocalPosByNormalizedPos_Box(b:p2.Body, pos:number[]): number[]
 {
     var shape = <p2.Box>(b.shapes[0]);
     if (shape == null) {
@@ -112,7 +112,7 @@ function LocalPosByNormalizePos_Box(b:p2.Body, pos:number[]): number[]
     return [w/2*pos[0], h/2*pos[1]];
 }
 
-function LocalPosByNormalizePos_Circle(c:p2.Body, pos:number[]): number[]
+function LocalPosByNormalizedPos_Circle(c:p2.Body, pos:number[]): number[]
 {
     var shape = <p2.Circle>(c.shapes[0]);
     if (shape == null) {

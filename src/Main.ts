@@ -120,6 +120,36 @@ class Main extends egret.DisplayObjectContainer {
             if (dt > 1000) {
                 return;
             }
+            var angle = g.arm.angle % (2*Math.PI);
+            if (angle < 0) {
+                angle += 2*Math.PI;
+            }
+            var STADY_P = 10;
+            var FRONT_ANGLE = 7/8 * 2*Math.PI;//7/8 * 2*Math.PI;
+            var BACK_ANGLE = 3/8 * 2*Math.PI;
+            var force_point = LocalPosByNormalizedPos_Box(g.arm, [1,0]);
+            if (g.arm_state == 0) {
+                if (angle<FRONT_ANGLE && angle>3/8 * 2*Math.PI) {
+                    //g.arm.angularVelocity = -STADY_P;
+                    g.arm.applyForceLocal([0,STADY_P],  force_point)
+                }
+                else {
+                    //g.arm.angularVelocity = STADY_P;
+                    g.arm.applyForceLocal([0,-STADY_P],  force_point)
+                }
+            }
+            else {
+                log(angle)
+                if (angle<BACK_ANGLE || angle>7/8 * 2*Math.PI) {
+                    //g.arm.angularVelocity = -STADY_P;
+                    g.arm.applyForceLocal([0,STADY_P],  force_point)
+                }
+                else {
+                    //g.arm.angularVelocity = STADY_P;
+                    g.arm.applyForceLocal([0,-STADY_P],  force_point)
+                }
+
+            }
             pw.Tick(dt);
             var w = pw.World();
             var fac = pw._factor;
@@ -154,7 +184,6 @@ class Main extends egret.DisplayObjectContainer {
         g.stageHeight = this.stage.stageHeight;
         
         pw.Init();
-        this.RegTicker();
         
         pw.createPlane(0,4);
         
@@ -168,26 +197,41 @@ class Main extends egret.DisplayObjectContainer {
         this.addChild(fix_circle.displays[0]);
         
         var con:p2.RevoluteConstraint;
+        var con_prismatic:p2.PrismaticConstraint;
         var prev_pos:number[];
         var con_pos:number[];
         
         function connect_box_box(b1:p2.Body, b2:p2.Body) {
-            prev_pos = LocalPosByNormalizePos_Box(b1, [1,0]);
-            con_pos = LocalPosByNormalizePos_Box(b2, [-1,0]);
+            var to_pos = [0,0];
+            b1.toWorldFrame(to_pos, [1,0]);
+            var offset = LocalPosByNormalizedPos_Box(b1, [1,0]);
+            b2.position = [to_pos[0]+offset[0], to_pos[1]+offset[1]];
+            
+            prev_pos = LocalPosByNormalizedPos_Box(b1, [1,0]);
+            con_pos = LocalPosByNormalizedPos_Box(b2, [-1,0]);
             con_pos[0] -= 0.1;
             con = new p2.RevoluteConstraint(b1, b2, {localPivotA:prev_pos, localPivotB:con_pos});
+            con.collideConnected = false;
             pw.World().addConstraint(con);
         }
         
-        var b1 = pw.CreateRect(1, 0.1, {mass:0.1});
+        var b1 = pw.CreateRect(1.5, 0.1, {mass:0.1});
         this.addChild(b1.displays[0]);
+        var to_pos = [0,0];
+        fix_circle.toWorldFrame(to_pos, [0,0]);
+        var offset = LocalPosByNormalizedPos_Box(b1, [1,0]);
+        b1.position = [to_pos[0]+offset[0], to_pos[1]+offset[1]];
         prev_pos = [0,0];
-        con_pos = LocalPosByNormalizePos_Box(b1, [-1, 0]);
+        con_pos = LocalPosByNormalizedPos_Box(b1, [-1, 0]);
         con_pos[0] -= 0.2;
         con = new p2.RevoluteConstraint(fix_circle, b1, {localPivotA:prev_pos, localPivotB:con_pos});
+        con.collideConnected = false;
+        con.setStiffness(1e18);
+        con.setRelaxation(0.5);
         pw.World().addConstraint(con);
+        g.arm = b1;
         
-        var weapon_length = 2;
+        var weapon_length = 4;
         var l_boxes: Array<p2.Body> = [];
         l_boxes.push(b1);
         for (var i=0; i<weapon_length; ++i) {
@@ -199,21 +243,23 @@ class Main extends egret.DisplayObjectContainer {
             connect_box_box(l_boxes[i], l_boxes[i+1]);
         }
         
-        var heavy_circle = pw.CreateCircle(0.3, {mass:0.5});
+        var heavy_circle = pw.CreateCircle(0.3, {mass:0.06});
         this.addChild(heavy_circle.displays[0]);
         var last_box = l_boxes[l_boxes.length-1];
-        prev_pos = LocalPosByNormalizePos_Box(last_box, [1,0]);
+        var to_pos = [0,0];
+        last_box.toWorldFrame(to_pos, [0,0]);
+        heavy_circle.position = [to_pos[0], to_pos[1]];
+        prev_pos = LocalPosByNormalizedPos_Box(last_box, [1,0]);
         prev_pos[0] += 0.3;
         con_pos = [0,0];
         con = new p2.RevoluteConstraint(last_box, heavy_circle, {localPivotA:prev_pos, localPivotB:con_pos});
         pw.World().addConstraint(con);
         
         this.addEventListener(egret.TouchEvent.TOUCH_TAP, (evt:egret.TouchEvent) => {
-            var force_point = LocalPosByNormalizePos_Box(b1, [1, 0]);
-            b1.applyForceLocal([0,-1000], [0.5,0]);
+            g.arm_state = g.arm_state==1 ? 0 : 1;
         }, this);
         this.touchEnabled = true;
-        
+        this.RegTicker();
     }
 
     /**

@@ -124,29 +124,47 @@ class Main extends egret.DisplayObjectContainer {
             if (angle < 0) {
                 angle += 2*Math.PI;
             }
-            var STADY_P = 7;
-            var FRONT_ANGLE = 7/8 * 2*Math.PI;//7/8 * 2*Math.PI;
-            var BACK_ANGLE = 3/8 * 2*Math.PI;
+            var STADY_P = 10;
+            var _2PI = 2*Math.PI;
+            var FRONT_ANGLE = 7/8 * _2PI;//7/8 * 2*Math.PI;
+            var BACK_ANGLE = 3/8 * _2PI;
             var force_point = LocalPosByNormalizedPos_Box(g.arm, [1,0]);
+            function pushArm(diff_angle:number, dir:number) {
+                g.arm.applyForceLocal([0,8*STADY_P/_2PI*diff_angle*dir],  force_point);
+                //g.arm.applyForceLocal([0,STADY_P*dir],  force_point);
+            }
             if (g.arm_state == 0) {
-                if (angle<FRONT_ANGLE && angle>4/8 * 2*Math.PI) {
+                if (angle<FRONT_ANGLE && angle>4/8 * _2PI) {
                     //g.arm.angularVelocity = -STADY_P;
-                    g.arm.applyForceLocal([0,STADY_P],  force_point)
+                    //g.arm.applyForceLocal([0,STADY_P],  force_point)
+                    pushArm(FRONT_ANGLE-angle, 1);
                 }
                 else {
                     //g.arm.angularVelocity = STADY_P;
-                    g.arm.applyForceLocal([0,-STADY_P],  force_point)
+                    //g.arm.applyForceLocal([0,-STADY_P],  force_point)
+                    if (angle >FRONT_ANGLE) {
+                        pushArm(angle-FRONT_ANGLE, -1);
+                    }
+                    else {
+                        pushArm(angle + 1/8*_2PI, -1);
+                    }
                 }
             }
             else {
-                log(angle)
                 if (angle<BACK_ANGLE || angle>6/8 * 2*Math.PI) {
                     //g.arm.angularVelocity = -STADY_P;
-                    g.arm.applyForceLocal([0,STADY_P],  force_point)
+                    //g.arm.applyForceLocal([0,STADY_P],  force_point)
+                    if (angle < BACK_ANGLE) {
+                        pushArm(BACK_ANGLE-angle, 1);
+                    }
+                    else {
+                        pushArm(_2PI - angle + BACK_ANGLE, 1);
+                    }
                 }
                 else {
                     //g.arm.angularVelocity = STADY_P;
-                    g.arm.applyForceLocal([0,-STADY_P],  force_point)
+                    //g.arm.applyForceLocal([0,-STADY_P],  force_point)
+                    pushArm(angle-BACK_ANGLE, -1);
                 }
 
             }

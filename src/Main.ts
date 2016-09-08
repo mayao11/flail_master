@@ -215,7 +215,7 @@ class Main extends egret.DisplayObjectContainer {
         this.addChild(fix_circle.displays[0]);
         
         var con:p2.RevoluteConstraint;
-        var con_prismatic:p2.PrismaticConstraint;
+        var con_lock:p2.LockConstraint;
         var prev_pos:number[];
         var con_pos:number[];
         
@@ -230,6 +230,8 @@ class Main extends egret.DisplayObjectContainer {
             con_pos[0] -= 0.1;
             con = new p2.RevoluteConstraint(b1, b2, {localPivotA:prev_pos, localPivotB:con_pos});
             con.collideConnected = false;
+            con.setRelaxation(2.5)
+            con.setStiffness(1e10);
             pw.World().addConstraint(con);
         }
         
@@ -244,16 +246,14 @@ class Main extends egret.DisplayObjectContainer {
         con_pos[0] -= 0.2;
         con = new p2.RevoluteConstraint(fix_circle, b1, {localPivotA:prev_pos, localPivotB:con_pos});
         con.collideConnected = false;
-        con.setStiffness(1e18);
-        con.setRelaxation(0.5);
         pw.World().addConstraint(con);
         g.arm = b1;
         
-        var weapon_length = 4;
+        var weapon_length = 5;
         var l_boxes: Array<p2.Body> = [];
         l_boxes.push(b1);
         for (var i=0; i<weapon_length; ++i) {
-            var new_box = pw.CreateRect(0.5, 0.1, {mass:0.03});
+            var new_box = pw.CreateRect(0.3, 0.1, {mass:0.03});
             l_boxes.push(new_box);
             this.addChild(new_box.displays[0]);
         }
